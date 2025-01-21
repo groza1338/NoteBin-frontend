@@ -15,7 +15,13 @@ const LoginPage = () => {
         try {
             const response = await authAPI.login({ login, password });
             console.log("✅ Вход выполнен:", response);
-            navigate("/notes"); // Перенаправляем на страницу заметок
+
+            if (response.accessToken) {
+                localStorage.setItem("accessToken", response.accessToken); // ✅ Сохраняем токен
+                navigate("/my-notes");
+            } else {
+                throw new Error("Не удалось получить accessToken");
+            }
         } catch (err) {
             setError("Ошибка входа. Проверьте логин и пароль.");
         }
