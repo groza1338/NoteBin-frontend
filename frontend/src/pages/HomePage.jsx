@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../api";
 
 const HomePage = () => {
     const [noteId, setNoteId] = useState("");
