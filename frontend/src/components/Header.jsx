@@ -1,9 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { authAPI } from "../api";
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -34,6 +35,8 @@ const Header = () => {
         navigate("/");
     };
 
+    const getNavLinkClass = (path) => (location.pathname === path ? "nav-link active" : "nav-link");
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
@@ -46,10 +49,13 @@ const Header = () => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
-                            <Link className="nav-link" to="/create">Создать заметку</Link>
+                            <Link className={getNavLinkClass("/")} to="/">Главная</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/my-notes">Мои заметки</Link>
+                            <Link className={getNavLinkClass("/create")} to="/create">Создать заметку</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className={getNavLinkClass("/my-notes")} to="/my-notes">Мои заметки</Link>
                         </li>
                     </ul>
 
@@ -67,7 +73,7 @@ const Header = () => {
                             </>
                         ) : (
                             <li className="nav-item">
-                                <Link className="btn btn-outline-primary btn-sm" to="/login">Войти</Link>
+                                <Link className={getNavLinkClass("/login")} to="/login">Войти</Link>
                             </li>
                         )}
                     </ul>
