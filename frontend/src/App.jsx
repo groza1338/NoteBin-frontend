@@ -5,10 +5,12 @@ import RegisterPage from "./pages/RegisterPage";
 import CreateNotePage from "./pages/CreateNotePage";
 import MyNotesPage from "./pages/MyNotesPage";
 import ViewNotePage from "./pages/ViewNotePage";
+import Header from "./components/Header";
 
 function App() {
     return (
         <Router>
+            <Header />
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
