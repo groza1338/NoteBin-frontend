@@ -51,8 +51,8 @@ const ViewNotePage = () => {
             return;
         }
 
-        const expirationTime = createdTime + durationMs;
-        console.log("⏳ Время истечения:", new Date(expirationTime).toISOString());
+        const expirationTime = createdTime + durationMs; // ✅ Теперь в локальном времени
+        console.log("⏳ Время истечения (локальное):", new Date(expirationTime).toLocaleString());
 
         const updateTimer = () => {
             const now = Date.now();
@@ -74,11 +74,11 @@ const ViewNotePage = () => {
 
     const parseCreatedAt = (createdAt) => {
         if (Array.isArray(createdAt) && createdAt.length >= 6) {
-            console.log("🔄 Преобразуем массив createdAt в дату:", createdAt);
-            return Date.UTC(createdAt[0], createdAt[1] - 1, createdAt[2], createdAt[3], createdAt[4], createdAt[5]);
+            console.log("🔄 Преобразуем массив createdAt в локальное время:", createdAt);
+            return new Date(createdAt[0], createdAt[1] - 1, createdAt[2], createdAt[3], createdAt[4], createdAt[5]).getTime();
         }
         if (typeof createdAt === "string") {
-            console.log("🔄 Преобразуем строку createdAt:", createdAt);
+            console.log("🔄 Преобразуем строку createdAt в локальное время:", createdAt);
             return new Date(createdAt).getTime();
         }
         console.error("❌ Ошибка: Неверный формат createdAt:", createdAt);
@@ -146,12 +146,6 @@ const ViewNotePage = () => {
                             <h2 className="text-center">{note.title}</h2>
                             <p className="text-muted text-center">Просмотров: {note.views}</p>
 
-                            {note.expirationType === "BURN_AFTER_READ" && (
-                                <div className="alert alert-warning text-center">
-                                    ⚠️ Внимание! Эта заметка исчезнет после прочтения.
-                                </div>
-                            )}
-
                             {note.expirationType === "BURN_BY_PERIOD" && timeLeft && (
                                 <div className="alert alert-danger text-center">
                                     ⏳ Осталось времени: <strong>{timeLeft}</strong>
@@ -161,8 +155,6 @@ const ViewNotePage = () => {
                             <div className="bg-light p-3 rounded">
                                 <pre className="m-0">{note.content}</pre>
                             </div>
-
-                            <p className="mt-3"><strong>Тип хранения:</strong> {note.expirationType}</p>
 
                             <div className="text-center mt-4">
                                 <a href="/" className="btn btn-primary">На главную</a>
