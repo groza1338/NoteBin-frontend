@@ -8,6 +8,7 @@ const ViewNotePage = () => {
     const [note, setNote] = useState(null);
     const [error, setError] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
+    const [viewsData, setViewsData] = useState(null); // ✅ Данные по просмотрам
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -24,6 +25,8 @@ const ViewNotePage = () => {
                 if (response.expirationType === "BURN_BY_PERIOD" && response.expirationPeriod) {
                     startCountdown(response);
                 }
+
+                fetchViewsAnalytics(noteId); // ✅ Загружаем просмотры
             } catch (err) {
                 console.error("❌ Ошибка при загрузке заметки:", err);
                 setError("Ошибка при загрузке заметки. Возможно, она была удалена.");
@@ -32,6 +35,19 @@ const ViewNotePage = () => {
 
         fetchNote();
     }, [noteId]);
+
+    const fetchViewsAnalytics = async (noteId) => {
+        try {
+            const response = await notesAPI.getAnalytics([noteId]);
+            console.log("📊 Аналитика просмотров:", response);
+
+            if (response[noteId]) {
+                setViewsData(response[noteId]); // ✅ Сохраняем просмотры
+            }
+        } catch (err) {
+            console.error("❌ Ошибка при загрузке аналитики:", err);
+        }
+    };
 
     const startCountdown = (noteData) => {
         if (!noteData.createdAt) {
@@ -51,7 +67,7 @@ const ViewNotePage = () => {
             return;
         }
 
-        const expirationTime = createdTime + durationMs; // ✅ Теперь в локальном времени
+        const expirationTime = createdTime + durationMs;
         console.log("⏳ Время истечения (локальное):", new Date(expirationTime).toLocaleString());
 
         const updateTimer = () => {
@@ -137,6 +153,8 @@ const ViewNotePage = () => {
         );
     }
 
+    const totalViews = viewsData ? viewsData.userViews + viewsData.anonymousViews : note.views; // ✅ Считаем суммарные просмотры
+
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -144,7 +162,9 @@ const ViewNotePage = () => {
                     <div className="card">
                         <div className="card-body">
                             <h2 className="text-center">{note.title}</h2>
-                            <p className="text-muted text-center">Просмотров: {note.views}</p>
+                            <p className="text-muted text-center">
+                                📊 Просмотров: {totalViews}
+                            </p>
 
                             {note.expirationType === "BURN_BY_PERIOD" && timeLeft && (
                                 <div className="alert alert-danger text-center">
