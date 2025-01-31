@@ -107,7 +107,7 @@ export const authAPI = {
 
 // 🔹 API для работы с заметками
 export const notesAPI = {
-    getNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "GET"),
+    getNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "GET", null, true),
     createNote: (noteData, token) => request(`${API_NOTES}/note`, "POST", noteData, true), // ✅ Передаём токен как Bearer
     updateNote: (noteId, updatedData) => request(`${API_NOTES}/note/${noteId}`, "PUT", updatedData, true),
     deactivateNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "PATCH", null, true),
