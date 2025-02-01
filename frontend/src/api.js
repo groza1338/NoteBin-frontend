@@ -40,7 +40,8 @@ const request = async (url, method = "GET", data = null, useAuth = false) => {
             response = await fetch(url, options); // ✅ Повторяем запрос
         } else {
             console.error("❌ Не удалось обновить токен. Требуется повторный вход.");
-            throw new Error("Не удалось обновить токен, требуется повторный логин.");
+            logoutAndRedirectToLogin(); // ✅ Выход из аккаунта
+            return;
         }
     }
 
@@ -95,8 +96,7 @@ export const authAPI = {
 
             if (!response.ok) {
                 console.error("❌ Ошибка обновления токена:", response.status);
-                setAccessToken(null);
-                localStorage.removeItem("accessToken");
+                logoutAndRedirectToLogin();
                 return null;
             }
 
@@ -112,8 +112,7 @@ export const authAPI = {
             return null;
         } catch (error) {
             console.error("❌ Ошибка обновления токена:", error);
-            setAccessToken(null);
-            localStorage.removeItem("accessToken");
+            logoutAndRedirectToLogin();
             return null;
         }
     },
@@ -129,4 +128,13 @@ export const notesAPI = {
     deactivateNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "PATCH", null, true),
     getUserNotes: (token, page = 0) => request(`${API_NOTES}/note/list/me?page=${page}`, "GET", null, true),
     getAnalytics: (urls) => request(`${API_NOTES}/analytics/view-notes`, "POST", { urls }, true),
+};
+
+import { useNavigate } from "react-router-dom";
+
+export const logoutAndRedirectToLogin = () => {
+    console.warn("❌ Токен истёк. Выход из аккаунта...");
+    localStorage.removeItem("accessToken");
+    accessToken = null;
+    window.location.href = "/login"; // ✅ Перенаправляем на страницу входа
 };
