@@ -14,7 +14,7 @@ const setAccessToken = (token) => {
 const request = async (url, method = "GET", data = null, useAuth = false) => {
     const headers = { "Content-Type": "application/json" };
 
-    // ✅ Добавляем токен в заголовок Authorization
+    // ✅ Добавляем токен, если он есть
     if (useAuth && accessToken) {
         headers["Authorization"] = `Bearer ${accessToken}`;
     }
@@ -22,32 +22,35 @@ const request = async (url, method = "GET", data = null, useAuth = false) => {
     const options = {
         method,
         headers,
-        credentials: "include", // Включаем куки для refresh-токена
+        credentials: "include", // ✅ Включаем куки для refresh-токена
         body: data ? JSON.stringify(data) : null,
     };
 
     let response = await fetch(url, options);
 
-    // Проверяем, есть ли тело в ответе
+    // ✅ Если токен истёк (401), пробуем обновить и повторить запрос
+    if (response.status === 401 && useAuth) {
+        console.warn("🔄 Access-токен истёк, обновляем...");
+        const newToken = await authAPI.refreshToken();
+
+        if (newToken) {
+            console.log("✅ Новый токен получен:", newToken);
+            setAccessToken(newToken);
+            headers["Authorization"] = `Bearer ${newToken}`; // ✅ Используем новый токен
+            response = await fetch(url, options); // ✅ Повторяем запрос
+        } else {
+            console.error("❌ Не удалось обновить токен. Требуется повторный вход.");
+            throw new Error("Не удалось обновить токен, требуется повторный логин.");
+        }
+    }
+
+    // ✅ Проверяем, есть ли тело в ответе
     const text = await response.text();
     let json;
     try {
         json = JSON.parse(text);
     } catch (e) {
-        json = text; // Если ответ - не JSON, просто возвращаем текст (например, accessToken как строку)
-    }
-
-    // ✅ Если токен истёк (403), пробуем обновить
-    if (response.status === 401 && useAuth) {
-        console.warn("🔄 Access-токен истёк, пытаемся обновить...");
-        const newToken = await authAPI.refreshToken();
-        if (newToken) {
-            setAccessToken(newToken);
-            headers["Authorization"] = `Bearer ${newToken}`;
-            response = await fetch(url, options); // Повторяем запрос с новым токеном
-        } else {
-            throw new Error("Не удалось обновить токен, требуется повторный логин.");
-        }
+        json = text; // Если ответ - не JSON, просто возвращаем текст
     }
 
     if (!response.ok) {
@@ -56,6 +59,7 @@ const request = async (url, method = "GET", data = null, useAuth = false) => {
 
     return json;
 };
+
 
 // 🔹 API для аутентификации
 export const authAPI = {
@@ -84,18 +88,30 @@ export const authAPI = {
 
     refreshToken: async () => {
         try {
-            const response = await request(`${API_AUTH}/auth/refresh`, "GET");
-            if (typeof response === "string") {
-                setAccessToken(response);
-                return response;
+            const response = await fetch(`${API_AUTH}/auth/refresh`, {
+                method: "GET",
+                credentials: "include", // ✅ Передаём куки
+            });
+
+            if (!response.ok) {
+                console.error("❌ Ошибка обновления токена:", response.status);
+                setAccessToken(null);
+                localStorage.removeItem("accessToken");
+                return null;
             }
-            if (response.accessToken) {
-                setAccessToken(response.accessToken);
-                return response.accessToken;
+
+            const newToken = await response.text(); // ✅ Получаем новый токен
+            console.log("✅ Новый accessToken:", newToken);
+
+            if (typeof newToken === "string") {
+                setAccessToken(newToken);
+                return newToken;
             }
+
+            console.error("❌ Сервер не вернул токен!");
             return null;
         } catch (error) {
-            console.error("Ошибка обновления токена:", error);
+            console.error("❌ Ошибка обновления токена:", error);
             setAccessToken(null);
             localStorage.removeItem("accessToken");
             return null;
