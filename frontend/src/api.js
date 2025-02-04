@@ -123,14 +123,12 @@ export const authAPI = {
 // 🔹 API для работы с заметками
 export const notesAPI = {
     getNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "GET", null, true),
-    createNote: (noteData, token) => request(`${API_NOTES}/note`, "POST", noteData, true), // ✅ Передаём токен как Bearer
+    createNote: (noteData) => request(`${API_NOTES}/note`, "POST", noteData, true), // ✅ Передаём токен как Bearer
     updateNote: (noteId, updatedData) => request(`${API_NOTES}/note/${noteId}`, "PUT", updatedData, true),
     deactivateNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "PATCH", null, true),
     getUserNotes: (token, page = 0) => request(`${API_NOTES}/note/list/me?page=${page}`, "GET", null, true),
     getAnalytics: (urls) => request(`${API_NOTES}/analytics/view-notes`, "POST", { urls }, true),
 };
-
-import { useNavigate } from "react-router-dom";
 
 export const logoutAndRedirectToLogin = () => {
     console.warn("❌ Токен истёк. Выход из аккаунта...");

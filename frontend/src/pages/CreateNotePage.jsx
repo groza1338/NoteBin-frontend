@@ -29,17 +29,12 @@ const CreateNotePage = () => {
         setError(null);
 
         try {
-            const token = localStorage.getItem("accessToken");
-            if (!token) {
-                throw new Error("Вы не авторизованы. Пожалуйста, войдите в аккаунт.");
-            }
-
             const noteData = { title, content, expirationType };
             if (expirationType === "BURN_BY_PERIOD") {
                 noteData.expirationPeriod = convertToIsoDuration(expirationPeriod); // ✅ Добавляем PT30M, PT1H
             }
 
-            const response = await notesAPI.createNote(noteData, token);
+            const response = await notesAPI.createNote(noteData);
             if (response.url) {
                 navigate(`/note/${response.url}`);
             } else {
