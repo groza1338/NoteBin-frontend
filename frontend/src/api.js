@@ -128,6 +128,7 @@ export const notesAPI = {
     deactivateNote: (noteId) => request(`${API_NOTES}/note/${noteId}`, "PATCH", null, true),
     getUserNotes: (token, page = 0) => request(`${API_NOTES}/note/list/me?page=${page}`, "GET", null, true),
     getAnalytics: (urls) => request(`${API_NOTES}/analytics/view-notes`, "POST", { urls }, true),
+    getPreview: (noteId) => request(`${API_NOTES}/note/preview/${noteId}`, "GET", null, true),
 };
 
 export const logoutAndRedirectToLogin = () => {
