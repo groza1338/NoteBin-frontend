@@ -1,16 +1,30 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { notesAPI } from "../api";
 
 const ViewNotePage = () => {
     const { noteId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [note, setNote] = useState(null);
     const [error, setError] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
-    const [viewsData, setViewsData] = useState(null); // ✅ Данные по просмотрам
+    const [viewsData, setViewsData] = useState(null);
 
     useEffect(() => {
+        const fetchNotePreview = async () => {
+            try {
+                const preview = await notesAPI.getPreview(noteId);
+                if (preview.expirationType === "BURN_AFTER_READ" && !location.state?.previewed) {
+                    navigate(`/preview/${noteId}`);
+                } else {
+                    fetchNote();
+                }
+            } catch (err) {
+                setError("Ошибка при загрузке предварительного просмотра заметки.");
+            }
+        };
+
         const fetchNote = async () => {
             try {
                 const response = await notesAPI.getNote(noteId);
@@ -26,15 +40,15 @@ const ViewNotePage = () => {
                     startCountdown(response);
                 }
 
-                fetchViewsAnalytics(noteId); // ✅ Загружаем просмотры
+                fetchViewsAnalytics(noteId);
             } catch (err) {
                 console.error("❌ Ошибка при загрузке заметки:", err);
                 setError("Ошибка при загрузке заметки. Возможно, она была удалена.");
             }
         };
 
-        fetchNote();
-    }, [noteId]);
+        fetchNotePreview();
+    }, [noteId, navigate, location.state]);
 
     const fetchViewsAnalytics = async (noteId) => {
         try {

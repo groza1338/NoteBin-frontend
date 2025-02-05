@@ -7,6 +7,7 @@ import MyNotesPage from "./pages/MyNotesPage";
 import ViewNotePage from "./pages/ViewNotePage";
 import Header from "./components/Header";
 import EditNotePage from "./pages/EditNotePage.jsx";
+import PreviewNotePage from "./pages/PreviewNotePage";
 
 function App() {
     return (
@@ -20,7 +21,7 @@ function App() {
                 <Route path="/my-notes" element={<MyNotesPage />} />
                 <Route path="/note/:noteId" element={<ViewNotePage />} />
                 <Route path="/edit/:noteId" element={<EditNotePage />} />
-
+                <Route path="/preview/:noteId" element={<PreviewNotePage />} /> {/* Новый маршрут */}
             </Routes>
         </Router>
     );
